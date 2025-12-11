@@ -39,12 +39,18 @@ public partial class UnoDoomGame : UserControl
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;
 
+        var scalingBox = new Viewbox();
+        scalingBox.Stretch = Microsoft.UI.Xaml.Media.Stretch.Uniform;
+        Content = scalingBox;
+
         _canvas = new SKXamlCanvas();
         _canvas.PaintSurface += OnPaintSurface;
         _canvas.HorizontalAlignment = HorizontalAlignment.Stretch;
         _canvas.VerticalAlignment = VerticalAlignment.Stretch;
-        
-        Content = _canvas;
+        _canvas.Width = 320;
+        _canvas.Height = 200;
+
+        scalingBox.Child = _canvas;
 
         this.Loaded += UnoDoomGame_Loaded;
         this.Unloaded += UnoDoomGame_Unloaded;
