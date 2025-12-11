@@ -23,7 +23,7 @@ public class ConfigUtilities : IConfigUtilities
     /// </summary>
     public static async Task PrepareAssetsAsync()
     {
-        var localFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Wads");
+        var localFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Wads", CreationCollisionOption.OpenIfExists);
         foreach (var name in iwadNames)
         {
             var assetPath = $"Assets/{name}";
@@ -33,9 +33,18 @@ public class ConfigUtilities : IConfigUtilities
                 if (fileFromAssets != null)
                 {
                     // Copy to local folder
-                    var copiedFile = await fileFromAssets.CopyAsync(localFolder, name, NameCollisionOption.ReplaceExisting);
-                    Console.WriteLine($"Copied IWAD {name} to local folder.");
-                    _localWadPath = copiedFile.Path;
+                    var existingFile = await localFolder.TryGetItemAsync(name);
+                    if (existingFile != null)
+                    {
+                        _localWadPath = existingFile.Path;
+                        Console.WriteLine($"IWAD {name} already exists in local folder.");
+                        break;
+                    } else
+                    {
+                        var copiedFile = await fileFromAssets.CopyAsync(localFolder, name, NameCollisionOption.ReplaceExisting);
+                        Console.WriteLine($"Copied IWAD {name} to local folder.");
+                        _localWadPath = copiedFile.Path;
+                    }
                 }
             }
             catch

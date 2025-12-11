@@ -49,6 +49,13 @@ public partial class UnoDoomGame : UserControl
         this.Unloaded += UnoDoomGame_Unloaded;
         this.KeyDown += UnoDoomGame_KeyDown;
         this.KeyUp += UnoDoomGame_KeyUp;
+        this.LosingFocus += UnoDoomGame_LosingFocus;
+    }
+
+    private void UnoDoomGame_LosingFocus(UIElement sender, LosingFocusEventArgs args)
+    {
+        // Always keep focus
+        args.Cancel = true;
     }
 
     private async void UnoDoomGame_Loaded(object sender, RoutedEventArgs e)
