@@ -18,6 +18,7 @@ public partial class UnoDoomGame : UserControl
     private UnoSound? _sound;
     private UnoMusic? _music;
     private UnoUserInput? _input;
+    private UnoGamepadInput? _gamepadInput;
 
     private CommandLineArgs? args;
     private Config? _config;
@@ -98,7 +99,13 @@ public partial class UnoDoomGame : UserControl
             _music = new UnoMusic(_config, _content);
             _input = new UnoUserInput(_config, !args.nomouse.Present);
 
+            // Initialize gamepad input
+            _gamepadInput = new UnoGamepadInput(_config, _input);
+
             _doom = new Doom(args, _config, _content, _video, _sound, _music, _input);
+
+            // Set the DOOM instance for gamepad input
+            _gamepadInput.SetDoom(_doom);
 
             fpsScale = args.timedemo.Present ? 1 : _config.video_fpsscale;
             frameCount = -1;
@@ -136,7 +143,7 @@ public partial class UnoDoomGame : UserControl
         _canvas?.Invalidate();
     }
 
-    private void OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
+    private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
         if (!_initialized || _doom == null)
             return;
@@ -196,6 +203,9 @@ public partial class UnoDoomGame : UserControl
 
     private void CleanupGame()
     {
+        _gamepadInput?.Dispose();
+        _gamepadInput = null;
+        
         _doom = null;
         _video?.Dispose();
         _sound?.Dispose();
