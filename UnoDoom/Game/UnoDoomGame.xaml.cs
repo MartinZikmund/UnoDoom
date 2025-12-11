@@ -41,7 +41,7 @@ public partial class UnoDoomGame : UserControl
 
         var scalingBox = new Viewbox();
         scalingBox.Stretch = Microsoft.UI.Xaml.Media.Stretch.Uniform;
-        Content = scalingBox;
+        CanvasRoot.Child = scalingBox;
 
         _canvas = new SKXamlCanvas();
         _canvas.PaintSurface += OnPaintSurface;
@@ -132,6 +132,7 @@ public partial class UnoDoomGame : UserControl
         _gameTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0); // 60 FPS target
         _gameTimer.Tick += GameTimer_Tick;
         _gameTimer.Start();
+        LoadingText.Visibility = Visibility.Collapsed;
     }
 
     private void StopGameLoop()
