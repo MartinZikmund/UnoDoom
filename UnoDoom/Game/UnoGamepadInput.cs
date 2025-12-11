@@ -65,17 +65,18 @@ public class UnoGamepadInput : IDisposable
             { GamepadButtons.LeftShoulder, DoomKey.Num1 }, // Previous weapon (weapon keys)
             { GamepadButtons.RightShoulder, DoomKey.Num2 }, // Next weapon
             
-            { GamepadButtons.DPadUp, DoomKey.W }, // Forward
-            { GamepadButtons.DPadDown, DoomKey.S }, // Backward
-            { GamepadButtons.DPadLeft, DoomKey.Left }, // Turn left
-            { GamepadButtons.DPadRight, DoomKey.Right }, // Turn right
+            // D-Pad mapping is context-sensitive (handled in ProcessDPad)
+            // In menu: Up/Down for navigation, in-game: movement/turning
             
-            { GamepadButtons.Menu, DoomKey.Escape }, // Menu
+            { GamepadButtons.Menu, DoomKey.Escape }, // Menu/Back
             { GamepadButtons.View, DoomKey.Tab }, // Automap
             
             { GamepadButtons.LeftThumbstick, DoomKey.LShift }, // Run
             { GamepadButtons.RightThumbstick, DoomKey.LAlt } // Strafe modifier
         };
+        
+        // For menu navigation, we also need to map A button to Enter for confirmation
+        // This will be handled in ProcessDPad method based on context
     }
 
     public void SetDoom(Doom doom)
@@ -109,11 +110,29 @@ public class UnoGamepadInput : IDisposable
     {
         var currentButtons = reading.Buttons;
         var changedButtons = currentButtons ^ _previousButtons;
+        bool isInMenu = _doom?.Menu.Active ?? false;
         
+        // Handle D-Pad context-sensitively
+        ProcessDPad(reading, changedButtons);
+        
+        // Handle A button context-sensitively (Enter in menu, Fire in game)
+        if ((changedButtons & GamepadButtons.A) != 0)
+        {
+            bool isPressed = (currentButtons & GamepadButtons.A) != 0;
+            var eventType = isPressed ? EventType.KeyDown : EventType.KeyUp;
+            var doomKey = isInMenu ? DoomKey.Enter : DoomKey.LControl;
+            _userInput.SetKeyStatus(eventType, doomKey, _doom!, new EventTimestamp());
+        }
+        
+        // Handle other buttons
         foreach (var mapping in _buttonMapping)
         {
             var button = mapping.Key;
             var doomKey = mapping.Value;
+            
+            // Skip A button as it's handled above context-sensitively
+            if (button == GamepadButtons.A)
+                continue;
             
             if ((changedButtons & button) != 0)
             {
@@ -125,6 +144,48 @@ public class UnoGamepadInput : IDisposable
         }
         
         _previousButtons = currentButtons;
+    }
+    
+    private void ProcessDPad(GamepadReading reading, GamepadButtons changedButtons)
+    {
+        var currentButtons = reading.Buttons;
+        bool isInMenu = _doom?.Menu.Active ?? false;
+        
+        // D-Pad Up
+        if ((changedButtons & GamepadButtons.DPadUp) != 0)
+        {
+            bool isPressed = (currentButtons & GamepadButtons.DPadUp) != 0;
+            var eventType = isPressed ? EventType.KeyDown : EventType.KeyUp;
+            var doomKey = isInMenu ? DoomKey.Up : DoomKey.W; // Menu navigation or forward movement
+            _userInput.SetKeyStatus(eventType, doomKey, _doom!, new EventTimestamp());
+        }
+        
+        // D-Pad Down  
+        if ((changedButtons & GamepadButtons.DPadDown) != 0)
+        {
+            bool isPressed = (currentButtons & GamepadButtons.DPadDown) != 0;
+            var eventType = isPressed ? EventType.KeyDown : EventType.KeyUp;
+            var doomKey = isInMenu ? DoomKey.Down : DoomKey.S; // Menu navigation or backward movement
+            _userInput.SetKeyStatus(eventType, doomKey, _doom!, new EventTimestamp());
+        }
+        
+        // D-Pad Left
+        if ((changedButtons & GamepadButtons.DPadLeft) != 0)
+        {
+            bool isPressed = (currentButtons & GamepadButtons.DPadLeft) != 0;
+            var eventType = isPressed ? EventType.KeyDown : EventType.KeyUp;
+            var doomKey = DoomKey.Left; // Always turn left
+            _userInput.SetKeyStatus(eventType, doomKey, _doom!, new EventTimestamp());
+        }
+        
+        // D-Pad Right
+        if ((changedButtons & GamepadButtons.DPadRight) != 0)
+        {
+            bool isPressed = (currentButtons & GamepadButtons.DPadRight) != 0;
+            var eventType = isPressed ? EventType.KeyDown : EventType.KeyUp;
+            var doomKey = DoomKey.Right; // Always turn right
+            _userInput.SetKeyStatus(eventType, doomKey, _doom!, new EventTimestamp());
+        }
     }
 
     private void ProcessAnalogInputs(GamepadReading reading)
