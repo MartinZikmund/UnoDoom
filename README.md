@@ -95,7 +95,7 @@ Stack: [Uno Platform](https://platform.uno/), [SkiaSharp](https://github.com/mon
 
 ## Ancestors
 
-[DOOM](https://github.com/id-Software/DOOM) -> [Linux Doom](https://github.com/id-Software/DOOM) -> [ManagedDoom](https://github.com/sinshu/managed-doom) -> this project.
+[DOOM](https://github.com/id-Software/DOOM) -> [Linux Doom](https://github.com/id-Software/DOOM) -> [ManagedDoom](https://github.com/sinshu/managed-doom) -> [Doom.Mobile](https://github.com/taublast/Doom.Mobile) -> this project.
 
 ## License
 
