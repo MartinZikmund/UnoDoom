@@ -1,0 +1,213 @@
+<UserControl
+    x:Class="UnoDoom.Game.TouchInputOverlay"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    IsHitTestVisible="True"
+    Opacity="0.85">
+
+    <Grid x:Name="RootGrid" Background="Transparent">
+        <!-- Left side: Movement joystick -->
+        <Canvas x:Name="MovementArea"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Width="200"
+                Height="200"
+                Margin="20,0,0,20">
+            <!-- Joystick base -->
+            <Ellipse x:Name="JoystickBase"
+                     Width="150"
+                     Height="150"
+                     Canvas.Left="25"
+                     Canvas.Top="25"
+                     Fill="#40808080"
+                     Stroke="#80FFFFFF"
+                     StrokeThickness="2"/>
+            <!-- Joystick knob -->
+            <Ellipse x:Name="JoystickKnob"
+                     Width="60"
+                     Height="60"
+                     Canvas.Left="70"
+                     Canvas.Top="70"
+                     Fill="#80FFFFFF"
+                     Stroke="White"
+                     StrokeThickness="2"/>
+        </Canvas>
+
+        <!-- Right side: Look/Turn joystick -->
+        <Canvas x:Name="LookArea"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Width="200"
+                Height="200"
+                Margin="0,0,220,20">
+            <!-- Look joystick base -->
+            <Ellipse x:Name="LookJoystickBase"
+                     Width="150"
+                     Height="150"
+                     Canvas.Left="25"
+                     Canvas.Top="25"
+                     Fill="#40808080"
+                     Stroke="#80FFFFFF"
+                     StrokeThickness="2"/>
+            <!-- Look joystick knob -->
+            <Ellipse x:Name="LookJoystickKnob"
+                     Width="60"
+                     Height="60"
+                     Canvas.Left="70"
+                     Canvas.Top="70"
+                     Fill="#80FFFFFF"
+                     Stroke="White"
+                     StrokeThickness="2"/>
+        </Canvas>
+
+        <!-- Right side: Action buttons -->
+        <StackPanel HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,20,20"
+                    Spacing="10">
+            <!-- Fire button -->
+            <Grid x:Name="FireButton"
+                  Width="80"
+                  Height="80"
+                  Background="#80FF0000"
+                  CornerRadius="40"
+                  BorderBrush="White"
+                  BorderThickness="2">
+                <TextBlock Text="FIRE"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="14"/>
+            </Grid>
+            <!-- Use button -->
+            <Grid x:Name="UseButton"
+                  Width="80"
+                  Height="80"
+                  Background="#8000FF00"
+                  CornerRadius="40"
+                  BorderBrush="White"
+                  BorderThickness="2">
+                <TextBlock Text="USE"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="14"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Top left: Menu/Escape button -->
+        <Grid x:Name="MenuButton"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              Width="50"
+              Height="50"
+              Margin="20,20,0,0"
+              Background="#60808080"
+              CornerRadius="8"
+              BorderBrush="White"
+              BorderThickness="1">
+            <TextBlock Text="≡"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       FontSize="24"/>
+        </Grid>
+
+        <!-- Top left: Hide overlay button (next to menu) -->
+        <Grid x:Name="HideButton"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              Width="50"
+              Height="50"
+              Margin="80,20,0,0"
+              Background="#60808080"
+              CornerRadius="8"
+              BorderBrush="White"
+              BorderThickness="1">
+            <TextBlock Text="👁"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="White"
+                       FontSize="20"/>
+        </Grid>
+
+        <!-- Top right: Weapon selection -->
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,20,20,0"
+                    Spacing="5">
+            <Grid x:Name="WeaponPrevButton"
+                  Width="50"
+                  Height="40"
+                  Background="#60808080"
+                  CornerRadius="8"
+                  BorderBrush="White"
+                  BorderThickness="1">
+                <TextBlock Text="◀"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="18"/>
+            </Grid>
+            <Grid x:Name="WeaponNextButton"
+                  Width="50"
+                  Height="40"
+                  Background="#60808080"
+                  CornerRadius="8"
+                  BorderBrush="White"
+                  BorderThickness="1">
+                <TextBlock Text="▶"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="18"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Bottom center: Run toggle and Map -->
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,60"
+                    Spacing="20">
+            <Grid x:Name="RunButton"
+                  Width="60"
+                  Height="50"
+                  Background="#60808080"
+                  CornerRadius="8"
+                  BorderBrush="White"
+                  BorderThickness="1">
+                <TextBlock x:Name="RunButtonText"
+                           Text="RUN"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="12"/>
+            </Grid>
+            <Grid x:Name="MapButton"
+                  Width="60"
+                  Height="50"
+                  Background="#60808080"
+                  CornerRadius="8"
+                  BorderBrush="White"
+                  BorderThickness="1">
+                <TextBlock Text="MAP"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="12"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>
