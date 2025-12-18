@@ -17,27 +17,27 @@
             FontSize="30"
             Foreground="White"
             Text="Loading..." />
-        <!-- Touch input overlay for mobile devices -->
-        <local:TouchInputOverlay x:Name="TouchOverlay" 
-                                  Visibility="Collapsed" />
-        <!-- Small button to show touch overlay when hidden -->
-        <Grid x:Name="ShowTouchOverlayButton"
-              HorizontalAlignment="Left"
-              VerticalAlignment="Top"
-              Width="40"
-              Height="40"
-              Margin="10,10,0,0"
-              Background="#40808080"
-              CornerRadius="20"
-              BorderBrush="#80FFFFFF"
-              BorderThickness="1"
-              Visibility="Collapsed"
-              PointerPressed="ShowTouchOverlayButton_PointerPressed">
-            <TextBlock Text="👁"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Foreground="White"
-                       FontSize="16"/>
+        <!--  Touch input overlay for mobile devices  -->
+        <local:TouchInputOverlay x:Name="TouchOverlay" Visibility="Collapsed" />
+        <!--  Small button to show touch overlay when hidden  -->
+        <Grid
+            x:Name="ShowTouchOverlayButton"
+            Width="40"
+            Height="40"
+            Margin="30,30,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="#40808080"
+            BorderBrush="#80FFFFFF"
+            BorderThickness="1"
+            CornerRadius="20"
+            PointerPressed="ShowTouchOverlayButton_PointerPressed"
+            Visibility="Collapsed">
+            <FontIcon
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="White"
+                Glyph="&#xE7B3;" />
         </Grid>
     </Grid>
 </UserControl>

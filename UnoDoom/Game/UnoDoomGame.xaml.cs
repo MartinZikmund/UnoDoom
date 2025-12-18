@@ -216,6 +216,9 @@ public partial class UnoDoomGame : UserControl
         // Update touch overlay frame count
         TouchOverlay.SetFrameCount(frameCount);
 
+        // Update menu state for touch overlay
+        _input?.SetMenuState(_doom!.Menu.Active);
+
         var frameFrac = Fixed.FromInt(1);
 
         // Update game every N frames based on fpsScale

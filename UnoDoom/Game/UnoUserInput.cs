@@ -19,6 +19,7 @@ public class UnoUserInput : IUserInput, IDisposable
     private float mouseDeltaX = 0;
     private float mouseDeltaY = 0;
     private TouchInputOverlay? _touchOverlay;
+    private bool _isInMenu;
 
     public UnoUserInput(Config config, bool useMouse)
     {
@@ -33,6 +34,12 @@ public class UnoUserInput : IUserInput, IDisposable
     public void SetTouchOverlay(TouchInputOverlay? overlay)
     {
         _touchOverlay = overlay;
+    }
+
+    public void SetMenuState(bool isInMenu)
+    {
+        _isInMenu = isInMenu;
+        _touchOverlay?.SetMenuState(isInMenu);
     }
 
     public void SetKeyStatus(EventType type, DoomKey doomKey, Doom doom, EventTimestamp currentTime)
@@ -172,18 +179,39 @@ public class UnoUserInput : IUserInput, IDisposable
         var keyRun = IsPressed(_config.key_run);
         var keyStrafe = IsPressed(_config.key_strafe);
 
+        // Check menu navigation keys
+        var menuUp = IsPressed(DoomKey.Up);
+        var menuDown = IsPressed(DoomKey.Down);
+        var menuLeft = IsPressed(DoomKey.Left);
+        var menuRight = IsPressed(DoomKey.Right);
+        var menuEnter = IsPressed(DoomKey.Enter);
+        var menuEscape = IsPressed(DoomKey.Escape);
+
         // Also check touch overlay input
         if (_touchOverlay != null)
         {
-            keyForward = keyForward || _touchOverlay.IsMoveForward;
-            keyBackward = keyBackward || _touchOverlay.IsMoveBackward;
-            keyStrafeLeft = keyStrafeLeft || _touchOverlay.IsStrafeLeft;
-            keyStrafeRight = keyStrafeRight || _touchOverlay.IsStrafeRight;
-            keyTurnLeft = keyTurnLeft || _touchOverlay.IsTurnLeft;
-            keyTurnRight = keyTurnRight || _touchOverlay.IsTurnRight;
-            keyFire = keyFire || _touchOverlay.IsFirePressed;
-            keyUse = keyUse || _touchOverlay.IsUsePressed;
-            keyRun = keyRun || _touchOverlay.IsRunToggled;
+            if (_isInMenu)
+            {
+                // In menu mode, touch inputs are for navigation
+                menuUp = menuUp || _touchOverlay.IsMoveForward; // Up arrow
+                menuDown = menuDown || _touchOverlay.IsMoveBackward; // Down arrow
+                menuLeft = menuLeft || _touchOverlay.IsStrafeLeft; // Left arrow
+                menuRight = menuRight || _touchOverlay.IsStrafeRight; // Right arrow
+                menuEnter = menuEnter || _touchOverlay.IsFirePressed; // Enter
+                menuEscape = menuEscape || _touchOverlay.IsUsePressed; // Escape
+            }
+            else
+            {
+                keyForward = keyForward || _touchOverlay.IsMoveForward;
+                keyBackward = keyBackward || _touchOverlay.IsMoveBackward;
+                keyStrafeLeft = keyStrafeLeft || _touchOverlay.IsStrafeLeft;
+                keyStrafeRight = keyStrafeRight || _touchOverlay.IsStrafeRight;
+                keyTurnLeft = keyTurnLeft || _touchOverlay.IsTurnLeft;
+                keyTurnRight = keyTurnRight || _touchOverlay.IsTurnRight;
+                keyFire = keyFire || _touchOverlay.IsFirePressed;
+                keyUse = keyUse || _touchOverlay.IsUsePressed;
+                keyRun = keyRun || _touchOverlay.IsRunToggled;
+            }
         }
 
         weaponKeys[0] = IsPressed(DoomKey.Num1);

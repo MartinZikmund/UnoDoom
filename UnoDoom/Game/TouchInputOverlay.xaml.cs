@@ -50,6 +50,9 @@ public sealed partial class TouchInputOverlay : UserControl
     private bool _turnRight;
     private int _weaponToSelect = -1;
 
+    // Menu state
+    private bool _isInMenu;
+
     /// <summary>
     /// Event raised when the user requests to hide the overlay.
     /// </summary>
@@ -75,6 +78,14 @@ public sealed partial class TouchInputOverlay : UserControl
     {
         _input = input;
         _doom = doom;
+    }
+
+    public void SetMenuState(bool isInMenu)
+    {
+        if (_isInMenu != isInMenu)
+        {
+            _isInMenu = isInMenu;
+        }
     }
 
     public void SetFrameCount(int frameCount)
@@ -313,13 +324,76 @@ public sealed partial class TouchInputOverlay : UserControl
             var angle = Math.Atan2(dy, dx);
             // Convert angle to direction flags
             // Up: -PI/2, Down: PI/2, Left: PI, Right: 0
-            _moveForward = dy < -JoystickRadius * DeadZone;
-            _moveBackward = dy > JoystickRadius * DeadZone;
-            _strafeLeft = dx < -JoystickRadius * DeadZone;
-            _strafeRight = dx > JoystickRadius * DeadZone;
+            if (_isInMenu)
+            {
+                // In menu mode, send arrow key presses directly
+                var upPressed = dy < -JoystickRadius * DeadZone;
+                var downPressed = dy > JoystickRadius * DeadZone;
+                var leftPressed = dx < -JoystickRadius * DeadZone;
+                var rightPressed = dx > JoystickRadius * DeadZone;
+
+                if (upPressed && !_moveForward)
+                {
+                    SendKeyPress(DoomKey.Up);
+                    _moveForward = true;
+                }
+                else if (!upPressed && _moveForward)
+                {
+                    SendKeyRelease(DoomKey.Up);
+                    _moveForward = false;
+                }
+
+                if (downPressed && !_moveBackward)
+                {
+                    SendKeyPress(DoomKey.Down);
+                    _moveBackward = true;
+                }
+                else if (!downPressed && _moveBackward)
+                {
+                    SendKeyRelease(DoomKey.Down);
+                    _moveBackward = false;
+                }
+
+                if (leftPressed && !_strafeLeft)
+                {
+                    SendKeyPress(DoomKey.Left);
+                    _strafeLeft = true;
+                }
+                else if (!leftPressed && _strafeLeft)
+                {
+                    SendKeyRelease(DoomKey.Left);
+                    _strafeLeft = false;
+                }
+
+                if (rightPressed && !_strafeRight)
+                {
+                    SendKeyPress(DoomKey.Right);
+                    _strafeRight = true;
+                }
+                else if (!rightPressed && _strafeRight)
+                {
+                    SendKeyRelease(DoomKey.Right);
+                    _strafeRight = false;
+                }
+            }
+            else
+            {
+                _moveForward = dy < -JoystickRadius * DeadZone;
+                _moveBackward = dy > JoystickRadius * DeadZone;
+                _strafeLeft = dx < -JoystickRadius * DeadZone;
+                _strafeRight = dx > JoystickRadius * DeadZone;
+            }
         }
         else
         {
+            if (_isInMenu)
+            {
+                // Release all arrow keys
+                if (_moveForward) SendKeyRelease(DoomKey.Up);
+                if (_moveBackward) SendKeyRelease(DoomKey.Down);
+                if (_strafeLeft) SendKeyRelease(DoomKey.Left);
+                if (_strafeRight) SendKeyRelease(DoomKey.Right);
+            }
             _moveForward = false;
             _moveBackward = false;
             _strafeLeft = false;
@@ -345,9 +419,17 @@ public sealed partial class TouchInputOverlay : UserControl
         Canvas.SetTop(LookJoystickKnob, 70 + dy);
 
         // Update turn state based on horizontal position
-        var horizontalDeadZone = JoystickRadius * DeadZone;
-        _turnLeft = dx < -horizontalDeadZone;
-        _turnRight = dx > horizontalDeadZone;
+        if (!_isInMenu)
+        {
+            var horizontalDeadZone = JoystickRadius * DeadZone;
+            _turnLeft = dx < -horizontalDeadZone;
+            _turnRight = dx > horizontalDeadZone;
+        }
+        else
+        {
+            _turnLeft = false;
+            _turnRight = false;
+        }
     }
 
     private void ResetMovementKnob()
@@ -458,8 +540,9 @@ public sealed partial class TouchInputOverlay : UserControl
 
             if (_doom != null && _input != null)
             {
+                var key = _isInMenu ? DoomKey.Enter : DoomKey.LControl;
                 var eventType = pressed ? EventType.KeyDown : EventType.KeyUp;
-                _input.SetKeyStatus(eventType, DoomKey.LControl, _doom, new EventTimestamp(_frameCount));
+                _input.SetKeyStatus(eventType, key, _doom, new EventTimestamp(_frameCount));
             }
         }
     }
@@ -475,8 +558,9 @@ public sealed partial class TouchInputOverlay : UserControl
 
             if (_doom != null && _input != null)
             {
+                var key = _isInMenu ? DoomKey.Escape : DoomKey.Space;
                 var eventType = pressed ? EventType.KeyDown : EventType.KeyUp;
-                _input.SetKeyStatus(eventType, DoomKey.Space, _doom, new EventTimestamp(_frameCount));
+                _input.SetKeyStatus(eventType, key, _doom, new EventTimestamp(_frameCount));
             }
         }
     }
@@ -486,7 +570,6 @@ public sealed partial class TouchInputOverlay : UserControl
         RunButton.Background = new SolidColorBrush(
             _runToggled ? Windows.UI.Color.FromArgb(0xC0, 0xFF, 0xFF, 0x00)
                         : Windows.UI.Color.FromArgb(0x60, 0x80, 0x80, 0x80));
-        RunButtonText.Text = _runToggled ? "WALK" : "RUN";
     }
 
     private void SendKeyPress(DoomKey key)
@@ -494,11 +577,19 @@ public sealed partial class TouchInputOverlay : UserControl
         if (_doom != null && _input != null)
         {
             _input.SetKeyStatus(EventType.KeyDown, key, _doom, new EventTimestamp(_frameCount));
-            // Schedule key release
+            // Schedule key release for momentary buttons
             DispatcherQueue.TryEnqueue(() =>
             {
                 _input?.SetKeyStatus(EventType.KeyUp, key, _doom, new EventTimestamp(_frameCount));
             });
+        }
+    }
+
+    private void SendKeyRelease(DoomKey key)
+    {
+        if (_doom != null && _input != null)
+        {
+            _input.SetKeyStatus(EventType.KeyUp, key, _doom, new EventTimestamp(_frameCount));
         }
     }
 
