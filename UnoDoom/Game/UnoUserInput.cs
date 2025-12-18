@@ -18,12 +18,28 @@ public class UnoUserInput : IUserInput, IDisposable
     private bool mouseGrabbed = false;
     private float mouseDeltaX = 0;
     private float mouseDeltaY = 0;
+    private TouchInputOverlay? _touchOverlay;
+    private bool _isInMenu;
 
     public UnoUserInput(Config config, bool useMouse)
     {
         _config = config;
         weaponKeys = new bool[7];
         mouseGrabbed = useMouse;
+    }
+
+    /// <summary>
+    /// Sets the touch input overlay for mobile input.
+    /// </summary>
+    public void SetTouchOverlay(TouchInputOverlay? overlay)
+    {
+        _touchOverlay = overlay;
+    }
+
+    public void SetMenuState(bool isInMenu)
+    {
+        _isInMenu = isInMenu;
+        _touchOverlay?.SetMenuState(isInMenu);
     }
 
     public void SetKeyStatus(EventType type, DoomKey doomKey, Doom doom, EventTimestamp currentTime)
@@ -151,6 +167,7 @@ public class UnoUserInput : IUserInput, IDisposable
 
     public void BuildTicCmd(TicCmd cmd)
     {
+        // Check keyboard/gamepad input
         var keyForward = IsPressed(_config.key_forward);
         var keyBackward = IsPressed(_config.key_backward);
         var keyStrafeLeft = IsPressed(_config.key_strafeleft);
@@ -161,6 +178,41 @@ public class UnoUserInput : IUserInput, IDisposable
         var keyUse = IsPressed(_config.key_use);
         var keyRun = IsPressed(_config.key_run);
         var keyStrafe = IsPressed(_config.key_strafe);
+
+        // Check menu navigation keys
+        var menuUp = IsPressed(DoomKey.Up);
+        var menuDown = IsPressed(DoomKey.Down);
+        var menuLeft = IsPressed(DoomKey.Left);
+        var menuRight = IsPressed(DoomKey.Right);
+        var menuEnter = IsPressed(DoomKey.Enter);
+        var menuEscape = IsPressed(DoomKey.Escape);
+
+        // Also check touch overlay input
+        if (_touchOverlay != null)
+        {
+            if (_isInMenu)
+            {
+                // In menu mode, touch inputs are for navigation
+                menuUp = menuUp || _touchOverlay.IsMoveForward; // Up arrow
+                menuDown = menuDown || _touchOverlay.IsMoveBackward; // Down arrow
+                menuLeft = menuLeft || _touchOverlay.IsStrafeLeft; // Left arrow
+                menuRight = menuRight || _touchOverlay.IsStrafeRight; // Right arrow
+                menuEnter = menuEnter || _touchOverlay.IsFirePressed; // Enter
+                menuEscape = menuEscape || _touchOverlay.IsUsePressed; // Escape
+            }
+            else
+            {
+                keyForward = keyForward || _touchOverlay.IsMoveForward;
+                keyBackward = keyBackward || _touchOverlay.IsMoveBackward;
+                keyStrafeLeft = keyStrafeLeft || _touchOverlay.IsStrafeLeft;
+                keyStrafeRight = keyStrafeRight || _touchOverlay.IsStrafeRight;
+                keyTurnLeft = keyTurnLeft || _touchOverlay.IsTurnLeft;
+                keyTurnRight = keyTurnRight || _touchOverlay.IsTurnRight;
+                keyFire = keyFire || _touchOverlay.IsFirePressed;
+                keyUse = keyUse || _touchOverlay.IsUsePressed;
+                keyRun = keyRun || _touchOverlay.IsRunToggled;
+            }
+        }
 
         weaponKeys[0] = IsPressed(DoomKey.Num1);
         weaponKeys[1] = IsPressed(DoomKey.Num2);
@@ -240,6 +292,26 @@ public class UnoUserInput : IUserInput, IDisposable
         if (keyStrafeRight)
         {
             side += PlayerBehavior.SideMove[speed];
+        }
+
+        // Apply analog touch input for smoother movement
+        if (_touchOverlay != null)
+        {
+            var (touchForward, touchStrafe, touchTurn) = _touchOverlay.GetMovementInput();
+            var touchSpeed = _touchOverlay.IsRunToggled ? 1 : speed;
+
+            if (Math.Abs(touchForward) > 0.1f)
+            {
+                forward += (int)(touchForward * PlayerBehavior.ForwardMove[touchSpeed]);
+            }
+            if (Math.Abs(touchStrafe) > 0.1f)
+            {
+                side += (int)(touchStrafe * PlayerBehavior.SideMove[touchSpeed]);
+            }
+            if (Math.Abs(touchTurn) > 0.1f)
+            {
+                cmd.AngleTurn -= (short)(touchTurn * PlayerBehavior.AngleTurn[touchSpeed] * 2);
+            }
         }
 
         if (keyFire)

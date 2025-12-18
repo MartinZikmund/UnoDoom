@@ -28,6 +28,7 @@ public partial class UnoDoomGame : UserControl
     private int fpsScale;
     private int frameCount;
     private bool _initialized;
+    private bool _touchOverlayEnabled;
 
     private DispatcherTimer? _gameTimer;
     private SKXamlCanvas _canvas;
@@ -57,6 +58,42 @@ public partial class UnoDoomGame : UserControl
         this.KeyDown += UnoDoomGame_KeyDown;
         this.KeyUp += UnoDoomGame_KeyUp;
         this.LosingFocus += UnoDoomGame_LosingFocus;
+
+        // Enable touch overlay by default on mobile platforms
+        _touchOverlayEnabled = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+    }
+
+    /// <summary>
+    /// Gets or sets whether the touch input overlay is enabled.
+    /// </summary>
+    public bool IsTouchOverlayEnabled
+    {
+        get => _touchOverlayEnabled;
+        set
+        {
+            _touchOverlayEnabled = value;
+            UpdateTouchOverlayVisibility();
+        }
+    }
+
+    /// <summary>
+    /// Toggles the touch input overlay on or off.
+    /// </summary>
+    public void ToggleTouchOverlay()
+    {
+        IsTouchOverlayEnabled = !IsTouchOverlayEnabled;
+    }
+
+    private void UpdateTouchOverlayVisibility()
+    {
+        TouchOverlay.Visibility = _touchOverlayEnabled ? Visibility.Visible : Visibility.Collapsed;
+        ShowTouchOverlayButton.Visibility = _touchOverlayEnabled ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void ShowTouchOverlayButton_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        IsTouchOverlayEnabled = true;
+        e.Handled = true;
     }
 
     private void UnoDoomGame_LosingFocus(UIElement sender, LosingFocusEventArgs args)
@@ -67,12 +104,21 @@ public partial class UnoDoomGame : UserControl
 
     private async void UnoDoomGame_Loaded(object sender, RoutedEventArgs e)
     {
+        // Subscribe to touch overlay hide event
+        TouchOverlay.HideRequested += TouchOverlay_HideRequested;
+        
         await InitializeGameAsync();
         StartGameLoop();
     }
 
+    private void TouchOverlay_HideRequested(object? sender, EventArgs e)
+    {
+        IsTouchOverlayEnabled = false;
+    }
+
     private void UnoDoomGame_Unloaded(object sender, RoutedEventArgs e)
     {
+        TouchOverlay.HideRequested -= TouchOverlay_HideRequested;
         StopGameLoop();
         CleanupGame();
     }
@@ -84,8 +130,8 @@ public partial class UnoDoomGame : UserControl
 
         try
         {
-#if __WASM__
-            // For WebAssembly, prepare assets first
+#if __WASM__ || __ANDROID__
+            // For WASM and Android prepare assets first
             await ConfigUtilities.PrepareAssetsAsync();
 #endif
 
@@ -112,6 +158,11 @@ public partial class UnoDoomGame : UserControl
 
             // Set the DOOM instance for gamepad input
             _gamepadInput.SetDoom(_doom);
+
+            // Initialize touch overlay
+            TouchOverlay.Initialize(_input, _doom);
+            _input.SetTouchOverlay(TouchOverlay);
+            UpdateTouchOverlayVisibility();
 
             fpsScale = args.timedemo.Present ? 1 : _config.video_fpsscale;
             frameCount = -1;
@@ -161,6 +212,12 @@ public partial class UnoDoomGame : UserControl
         var destination = new SKRect(0, 0, e.Info.Width, e.Info.Height);
 
         frameCount++;
+
+        // Update touch overlay frame count
+        TouchOverlay.SetFrameCount(frameCount);
+
+        // Update menu state for touch overlay
+        _input?.SetMenuState(_doom!.Menu.Active);
 
         var frameFrac = Fixed.FromInt(1);
 
