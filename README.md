@@ -4,6 +4,8 @@ A cross-platform DOOM game built with **Uno Platform**, play it on **iOS, MacCat
 
 Uses a modified C# Doom engine from [ManagedDoom](https://github.com/sinshu/managed-doom).
 
+**Forked from the amazing work by [@taublast](https://github.com/taublast) at https://github.com/taublast/Doom.Mobile**!
+
 ## Why Another .NET DOOM?
 
 * True cross-platform implementation using Uno Platform for iOS, MacCatalyst, Android, Windows, Linux, and WebAssembly.
