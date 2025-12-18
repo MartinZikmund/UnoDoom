@@ -130,8 +130,8 @@ public partial class UnoDoomGame : UserControl
 
         try
         {
-#if __WASM__
-            // For WebAssembly, prepare assets first
+#if __WASM__ || __ANDROID__
+            // For WASM and Android prepare assets first
             await ConfigUtilities.PrepareAssetsAsync();
 #endif
 

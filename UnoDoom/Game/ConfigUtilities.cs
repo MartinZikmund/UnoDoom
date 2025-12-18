@@ -15,7 +15,7 @@ public class ConfigUtilities : IConfigUtilities
         "freedoom1.wad"
     };
 
-#if __WASM__
+#if __WASM__ || __ANDROID__
     private static string _localWadPath;
 
     /// <summary>
@@ -85,7 +85,7 @@ public class ConfigUtilities : IConfigUtilities
 
     public string GetDefaultIwadPath()
     {
-#if __WASM__
+#if __WASM__ || __ANDROID__
         return _localWadPath;
 
         throw new Exception("No IWAD was found! Make sure to call PrepareAssetsAsync() first.");
