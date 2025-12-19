@@ -130,7 +130,7 @@ public partial class UnoDoomGame : UserControl
 
         try
         {
-#if __WASM__ || __ANDROID__
+#if __WASM__ || __ANDROID__ || __IOS__
             // For WASM and Android prepare assets first
             await ConfigUtilities.PrepareAssetsAsync();
 #endif
