@@ -1,8 +1,10 @@
 # UnoDOOM
 
-A cross-platform DOOM game built with **Uno Platform**, play it on **iOS, MacCatalyst, Android, Windows, Linux, and WebAssembly**.
+A cross-platform DOOM game built with **Uno Platform**, play it on **iOS, MacCatalyst, Android, Windows, Linux, and WebAssembly**. Supports keyboard, touch, and game controller input.
 
 Uses a modified C# Doom engine from [ManagedDoom](https://github.com/sinshu/managed-doom).
+
+## Try it out [in the browser](https://happy-tree-0e73b8e10.3.azurestaticapps.net/)
 
 **Forked from the amazing work by [@taublast](https://github.com/taublast) at https://github.com/taublast/Doom.Mobile**!
 
