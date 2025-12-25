@@ -12,6 +12,6 @@
     -->
     <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257</NoWarn>
 
-      <UnoVersion>6.5.0-dev.319</UnoVersion>
+      <UnoVersion>6.5.0-dev.421</UnoVersion>
   </PropertyGroup>
 </Project>
