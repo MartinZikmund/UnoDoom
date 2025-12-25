@@ -1,2 +1,6 @@
-﻿<Project>
+<Project>
+    <Target Name="UnoSdkVersionCheck"
+			AfterTargets="ResolveReferences"
+			BeforeTargets="BeforeBuild">
+    </Target>
 </Project>

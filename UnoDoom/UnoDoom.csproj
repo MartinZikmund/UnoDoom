@@ -5,7 +5,6 @@
         <OutputType>Exe</OutputType>
         <UnoSingleProject>true</UnoSingleProject>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-
         <!-- Display name -->
         <ApplicationTitle>DOOM</ApplicationTitle>
         <!-- App Identifier -->
