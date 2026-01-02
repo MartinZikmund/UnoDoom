@@ -45,6 +45,8 @@
         <UnoIconForegroundFile>Assets/unodoomicon.png</UnoIconForegroundFile>
         <UnoSplashScreenFile>Assets/unodoomsplash.png</UnoSplashScreenFile>
         <UnoSplashScreenColor>#000000</UnoSplashScreenColor>
+
+        <WasmShellMonoRuntimeExecutionMode>Interpreter</WasmShellMonoRuntimeExecutionMode>
     </PropertyGroup>
 
     <ItemGroup>
