@@ -13,6 +13,12 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+        this.UnhandledException += App_UnhandledException;
+    }
+
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        global::System.Console.WriteLine("Unhandled exception: " + e.Exception.ToString()); 
     }
 
     protected Window? MainWindow { get; private set; }
@@ -78,6 +84,7 @@ public partial class App : Application
         {
 #if __WASM__
             builder.AddProvider(new global::Uno.Extensions.Logging.WebAssembly.WebAssemblyConsoleLoggerProvider());
+            builder.AddConsole();
 #elif __IOS__
             builder.AddProvider(new global::Uno.Extensions.Logging.OSLogLoggerProvider());
 
@@ -88,12 +95,12 @@ public partial class App : Application
 #endif
 
             // Exclude logs below this level
-            builder.SetMinimumLevel(LogLevel.Debug);
+            builder.SetMinimumLevel(LogLevel.Trace);
 
             // Default filters for Uno Platform namespaces
-            builder.AddFilter("Uno", LogLevel.Debug);
-            builder.AddFilter("Windows", LogLevel.Debug);
-            builder.AddFilter("Microsoft", LogLevel.Debug);
+            builder.AddFilter("Uno", LogLevel.Trace);
+            builder.AddFilter("Windows", LogLevel.Trace);
+            builder.AddFilter("Microsoft", LogLevel.Trace);
 
             // Generic Xaml events
             // builder.AddFilter("Microsoft.UI.Xaml", LogLevel.Debug );
