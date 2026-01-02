@@ -5,7 +5,6 @@
         <OutputType>Exe</OutputType>
         <UnoSingleProject>true</UnoSingleProject>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-
         <!-- Display name -->
         <ApplicationTitle>DOOM</ApplicationTitle>
         <!-- App Identifier -->
@@ -46,6 +45,8 @@
         <UnoIconForegroundFile>Assets/unodoomicon.png</UnoIconForegroundFile>
         <UnoSplashScreenFile>Assets/unodoomsplash.png</UnoSplashScreenFile>
         <UnoSplashScreenColor>#000000</UnoSplashScreenColor>
+
+        <WasmShellMonoRuntimeExecutionMode>Interpreter</WasmShellMonoRuntimeExecutionMode>
     </PropertyGroup>
 
     <ItemGroup>

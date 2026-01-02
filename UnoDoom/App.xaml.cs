@@ -13,6 +13,12 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+        this.UnhandledException += App_UnhandledException;
+    }
+
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        global::System.Console.WriteLine("Unhandled exception: " + e.Exception.ToString()); 
     }
 
     protected Window? MainWindow { get; private set; }
@@ -66,7 +72,6 @@ public partial class App : Application
     /// </summary>
     public static void InitializeLogging()
     {
-#if DEBUG
         // Logging is disabled by default for release builds, as it incurs a significant
         // initialization cost from Microsoft.Extensions.Logging setup. If startup performance
         // is a concern for your application, keep this disabled. If you're running on the web or
@@ -88,12 +93,12 @@ public partial class App : Application
 #endif
 
             // Exclude logs below this level
-            builder.SetMinimumLevel(LogLevel.Information);
+            builder.SetMinimumLevel(LogLevel.Trace);
 
             // Default filters for Uno Platform namespaces
-            builder.AddFilter("Uno", LogLevel.Warning);
-            builder.AddFilter("Windows", LogLevel.Warning);
-            builder.AddFilter("Microsoft", LogLevel.Warning);
+            builder.AddFilter("Uno", LogLevel.Trace);
+            builder.AddFilter("Windows", LogLevel.Trace);
+            builder.AddFilter("Microsoft", LogLevel.Trace);
 
             // Generic Xaml events
             // builder.AddFilter("Microsoft.UI.Xaml", LogLevel.Debug );
@@ -127,7 +132,6 @@ public partial class App : Application
 
 #if HAS_UNO
         global::Uno.UI.Adapter.Microsoft.Extensions.Logging.LoggingAdapter.Initialize();
-#endif
 #endif
     }
 }
