@@ -72,7 +72,6 @@ public partial class App : Application
     /// </summary>
     public static void InitializeLogging()
     {
-#if DEBUG
         // Logging is disabled by default for release builds, as it incurs a significant
         // initialization cost from Microsoft.Extensions.Logging setup. If startup performance
         // is a concern for your application, keep this disabled. If you're running on the web or
@@ -84,7 +83,6 @@ public partial class App : Application
         {
 #if __WASM__
             builder.AddProvider(new global::Uno.Extensions.Logging.WebAssembly.WebAssemblyConsoleLoggerProvider());
-            builder.AddConsole();
 #elif __IOS__
             builder.AddProvider(new global::Uno.Extensions.Logging.OSLogLoggerProvider());
 
@@ -134,7 +132,6 @@ public partial class App : Application
 
 #if HAS_UNO
         global::Uno.UI.Adapter.Microsoft.Extensions.Logging.LoggingAdapter.Initialize();
-#endif
 #endif
     }
 }
