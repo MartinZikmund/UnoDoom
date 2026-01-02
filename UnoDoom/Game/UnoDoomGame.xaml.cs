@@ -3,14 +3,44 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using SkiaSharp;
-using SkiaSharp.Views.Windows;
 using System.Diagnostics;
+#if HAS_UNO
+using Uno.WinUI.Graphics2DSK;
+#endif
 #if WINDOWS || __MACCATALYST__ || __MACOS__
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 #endif
 
 namespace UnoDoom.Game;
+
+#if HAS_UNO
+/// <summary>
+/// Event args for canvas rendering.
+/// </summary>
+internal class SKCanvasElementPaintEventArgs : EventArgs
+{
+    public SKCanvas Canvas { get; internal set; } = null!;
+    public Windows.Foundation.Size Size { get; internal set; }
+}
+
+/// <summary>
+/// Custom SKCanvasElement for rendering the DOOM game.
+/// </summary>
+internal class DoomCanvasElement : SKCanvasElement
+{
+    private readonly SKCanvasElementPaintEventArgs _eventArgs = new();
+
+    public event EventHandler<SKCanvasElementPaintEventArgs>? PaintSurface;
+
+    protected override void RenderOverride(SKCanvas canvas, Windows.Foundation.Size size)
+    {
+        _eventArgs.Canvas = canvas;
+        _eventArgs.Size = size;
+        PaintSurface?.Invoke(this, _eventArgs);
+    }
+}
+#endif
 
 public partial class UnoDoomGame : UserControl
 {
@@ -31,7 +61,9 @@ public partial class UnoDoomGame : UserControl
     private bool _touchOverlayEnabled;
 
     private DispatcherTimer? _gameTimer;
-    private SKXamlCanvas _canvas;
+#if HAS_UNO
+    private DoomCanvasElement _canvas;
+#endif
 
     public UnoDoomGame()
     {
@@ -44,7 +76,8 @@ public partial class UnoDoomGame : UserControl
         scalingBox.Stretch = Microsoft.UI.Xaml.Media.Stretch.Uniform;
         CanvasRoot.Child = scalingBox;
 
-        _canvas = new SKXamlCanvas();
+#if HAS_UNO
+        _canvas = new DoomCanvasElement();
         _canvas.PaintSurface += OnPaintSurface;
         _canvas.HorizontalAlignment = HorizontalAlignment.Stretch;
         _canvas.VerticalAlignment = VerticalAlignment.Stretch;
@@ -52,6 +85,7 @@ public partial class UnoDoomGame : UserControl
         _canvas.Height = 200;
 
         scalingBox.Child = _canvas;
+#endif
 
         this.Loaded += UnoDoomGame_Loaded;
         this.Unloaded += UnoDoomGame_Unloaded;
@@ -181,7 +215,9 @@ public partial class UnoDoomGame : UserControl
     {
         _gameTimer = new DispatcherTimer();
         _gameTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0); // 60 FPS target
+#if HAS_UNO
         _gameTimer.Tick += GameTimer_Tick;
+#endif
         _gameTimer.Start();
         LoadingText.Visibility = Visibility.Collapsed;
     }
@@ -191,25 +227,28 @@ public partial class UnoDoomGame : UserControl
         if (_gameTimer != null)
         {
             _gameTimer.Stop();
+#if HAS_UNO
             _gameTimer.Tick -= GameTimer_Tick;
+#endif
             _gameTimer = null;
         }
     }
 
+#if HAS_UNO
     private void GameTimer_Tick(object? sender, object e)
     {
         _canvas?.Invalidate();
     }
 
-    private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
+    private void OnPaintSurface(object? sender, SKCanvasElementPaintEventArgs e)
     {
         if (!_initialized || _doom == null)
             return;
 
-        var canvas = e.Surface.Canvas;
+        var canvas = e.Canvas;
         canvas.Clear(SKColors.Black);
 
-        var destination = new SKRect(0, 0, e.Info.Width, e.Info.Height);
+        var destination = new SKRect(0, 0, (float)e.Size.Width, (float)e.Size.Height);
 
         frameCount++;
 
@@ -238,6 +277,7 @@ public partial class UnoDoomGame : UserControl
         // Render the game
         _video?.Render(canvas, destination, _doom!, frameFrac);
     }
+#endif
 
     private void UnoDoomGame_KeyDown(object sender, KeyRoutedEventArgs e)
     {
